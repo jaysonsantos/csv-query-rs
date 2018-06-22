@@ -1,0 +1,13 @@
+[package]
+authors = ["Jayson Reis <santosdosreis@gmail.com>"]
+name = "csv-query-rs"
+version = "0.1.0"
+
+[dependencies]
+csv = "*"
+error-chain = "*"
+sqlite = "*"
+
+[[bin]]
+name = "csv_query"
+path = "src/main.rs"
