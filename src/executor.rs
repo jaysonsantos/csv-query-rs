@@ -1,18 +1,22 @@
-use std::io::Read;
+use std::io::{BufRead, Read, Write};
 
 use csv;
 use errors;
 use sqlite;
 
-pub struct Executor {
+pub struct Executor<W: Write> {
     columns: Vec<String>,
     conn: sqlite::Connection,
+    output: W,
 }
 
-impl Executor {
-    pub fn with_csv<R>(reader: R) -> errors::Result<Executor>
+impl<W> Executor<W>
+where
+    W: Write,
+{
+    pub fn with_csv<R>(reader: R, output: W) -> errors::Result<Executor<W>>
     where
-        R: Read,
+        R: BufRead,
     {
         let mut csv_readr = csv::ReaderBuilder::new()
             .delimiter(b';')
@@ -26,7 +30,11 @@ impl Executor {
             .collect();
         let conn = Self::create_database(&columns)?;
         Self::fill_data(&conn, &columns, csv_readr)?;
-        Ok(Executor { columns, conn })
+        Ok(Executor {
+            columns,
+            conn,
+            output,
+        })
     }
 
     fn create_database(columns: &Vec<String>) -> errors::Result<sqlite::Connection> {
@@ -68,12 +76,22 @@ impl Executor {
         Ok(())
     }
 
-    pub fn print_results(self, query: &str) -> errors::Result<()> {
+    pub fn print_results(&mut self, query: &str) -> errors::Result<()> {
         let mut cursor = self.conn.prepare(query).unwrap().cursor();
 
         while let Some(row) = cursor.next().unwrap() {
-            println!("{:?}", row);
+            writeln!(self.output, "{:?}", row).unwrap();
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_nothing() {
+        let input = BufReader::new();
+        let mut output = BufWriter::new();
+        let mut executor = Executor::with_csv(reader, output);
     }
 }
