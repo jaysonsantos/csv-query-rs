@@ -4,6 +4,7 @@ name = "csv-query-rs"
 version = "0.1.0"
 
 [dependencies]
+clap = "*"
 csv = "*"
 error-chain = "*"
 # sqlite = "*"
