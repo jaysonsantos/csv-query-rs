@@ -16,7 +16,6 @@ Save these two example files.
 user.csv
 ```csv
 user_id;name
-user_id;name
 1;User 1
 2;User 2
 3;User 3

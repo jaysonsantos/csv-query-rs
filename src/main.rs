@@ -49,7 +49,8 @@ fn process() -> Result<()> {
         .collect();
 
     let mut executor = Executor::with_csv(input_buffers, io::BufWriter::new(io::stdout()))?;
-    executor.print_results(matches.value_of("query").unwrap())?;
+    let query = matches.value_of("query").unwrap();
+    executor.print_results(query)?;
     Ok(())
 }
 
