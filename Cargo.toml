@@ -6,8 +6,12 @@ version = "0.1.0"
 [dependencies]
 csv = "*"
 error-chain = "*"
-sqlite = "*"
+# sqlite = "*"
 
 [[bin]]
 name = "csv_query"
 path = "src/main.rs"
+
+[dependencies.sqlite]
+git = "https://github.com/jaysonsantos/sqlite-rs"
+branch = "column-name"
