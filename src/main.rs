@@ -12,6 +12,7 @@ use std::env;
 use std::io;
 
 fn process() -> errors::Result<()> {
+    eprintln!("Reading data from stdin");
     let mut executor = Executor::with_csv(
         io::BufReader::new(io::stdin()),
         io::BufWriter::new(io::stdout()),
@@ -21,5 +22,5 @@ fn process() -> errors::Result<()> {
 }
 
 fn main() {
-    process().unwrap();
+    process().expect("Error running processor");
 }
