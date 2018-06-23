@@ -1,11 +1,13 @@
 use std::io::{BufRead, Read, Write};
 
 use csv;
-use errors;
 use sqlite;
 
+use db_utils::{escape_columns, escape_values};
+use errors::{Result, ResultExt};
+
 pub struct Executor<W: Write> {
-    columns: Vec<String>,
+    // columns: Vec<String>,
     conn: sqlite::Connection,
     output: W,
 }
@@ -14,7 +16,7 @@ impl<W> Executor<W>
 where
     W: Write,
 {
-    pub fn with_csv<R>(reader: R, output: W) -> errors::Result<Executor<W>>
+    pub fn with_csv<R>(reader: R, output: W) -> Result<Executor<W>>
     where
         R: BufRead,
     {
@@ -22,65 +24,98 @@ where
             .delimiter(b';')
             .from_reader(reader);
 
-        let columns = csv_readr
-            .headers()
-            .unwrap()
-            .iter()
-            .map(|e| e.into())
-            .collect();
-        let conn = Self::create_database(&columns)?;
-        Self::fill_data(&conn, &columns, csv_readr)?;
-        Ok(Executor {
-            columns,
-            conn,
-            output,
-        })
+        let columns = {
+            csv_readr
+                .headers()
+                .chain_err(|| "Error reading headers")?
+                .clone()
+        };
+        let conn = Self::create_database(&columns, 1)?;
+        Self::fill_data(&conn, &columns, 1, csv_readr)?;
+        Ok(Executor { conn, output })
     }
 
-    fn create_database(columns: &Vec<String>) -> errors::Result<sqlite::Connection> {
-        let conn = sqlite::open(":memory:").unwrap();
+    fn create_database(
+        columns: &csv::StringRecord,
+        table_number: u8,
+    ) -> Result<sqlite::Connection> {
+        let conn = sqlite::open(":memory:").chain_err(|| "Error opening memory database.")?;
         let quoted_columns: Vec<String> = columns
             .iter()
             .map(|c| format!("\"{}\" VARCHAR NULL", c))
             .collect();
-        let create_query = format!("CREATE TABLE table1 ({})", quoted_columns.join(", "));
-        conn.execute(create_query).unwrap();
+        let create_query = format!(
+            "CREATE TABLE table{} ({})",
+            table_number,
+            quoted_columns.join(", ")
+        );
+        conn.execute(&create_query)
+            .chain_err(|| format!("Error creating the database. Used query {}", create_query))?;
         Ok(conn)
     }
 
     fn fill_data<R>(
         conn: &sqlite::Connection,
-        columns: &Vec<String>,
+        columns: &csv::StringRecord,
+        table_number: u8,
         mut reader: csv::Reader<R>,
-    ) -> errors::Result<()>
+    ) -> Result<()>
     where
         R: Read,
     {
-        let quoted_columns: Vec<String> = columns.iter().map(|c| format!("\"{}\"", c)).collect();
+        let quoted_columns = escape_columns(columns);
         let insert = format!(
-            "INSERT INTO table1 ({}) VALUES\n",
+            "INSERT INTO table{} ({}) VALUES\n",
+            table_number,
             quoted_columns.join(", ")
         );
         let mut rows: Vec<String> = vec![];
         for row in reader.records() {
-            let row = row.unwrap();
-            let db_row: Vec<String> = row
-                .iter()
-                .map(|c| c.replace("'", "''"))
-                .map(|c| format!("'{}'", c))
-                .collect();
+            let row = row.chain_err(|| "Error reading row")?;
+            let db_row = escape_values(&row);
             rows.push(format!("({})", db_row.join(", ")));
         }
         let final_query = format!("{}{}", insert, rows.join(",\n"));
-        conn.execute(final_query).unwrap();
+        conn.execute(&final_query)
+            .chain_err(|| "Error running insert query.")?;
         Ok(())
     }
 
-    pub fn print_results(&mut self, query: &str) -> errors::Result<()> {
-        let mut cursor = self.conn.prepare(query).unwrap().cursor();
-
-        while let Some(row) = cursor.next().unwrap() {
-            writeln!(self.output, "{:?}", row).unwrap();
+    pub fn print_results(&mut self, query: &str) -> Result<()> {
+        let prepared = self
+            .conn
+            .prepare(query)
+            .chain_err(|| format!("Error preparing query: {}", query))?;
+        let output_error = "Error writing on selected output";
+        writeln!(
+            self.output,
+            "{}",
+            &prepared
+                .column_names()
+                .iter()
+                .map(|c| format!("\"{}\"", c))
+                .collect::<Vec<String>>()
+                .join(";")
+        ).chain_err(|| output_error)?;
+        let mut cursor = prepared.cursor();
+        while let Some(row) = cursor.next().chain_err(|| "Error reading results")? {
+            writeln!(
+                self.output,
+                "{}",
+                row.iter()
+                    .map(|e| format!(
+                        "\"{}\"",
+                        match e.kind() {
+                            sqlite::Type::Float => e.as_float().unwrap().to_string(),
+                            sqlite::Type::String => e.as_string().unwrap().to_owned(),
+                            sqlite::Type::Integer => e.as_integer().unwrap().to_string(),
+                            sqlite::Type::Null => "".to_owned(),
+                            _ => "Cannot parse binary".to_owned(),
+                        }
+                    ))
+                    .collect::<Vec<String>>()
+                    .join(";")
+            ).chain_err(|| output_error)?;
         }
         Ok(())
     }
