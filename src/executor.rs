@@ -16,30 +16,38 @@ impl<W> Executor<W>
 where
     W: Write,
 {
-    pub fn with_csv<R>(reader: R, output: W) -> Result<Executor<W>>
+    pub fn with_csv<R>(readers: Vec<R>, output: W) -> Result<Executor<W>>
     where
         R: BufRead,
     {
-        let mut csv_readr = csv::ReaderBuilder::new()
-            .delimiter(b';')
-            .from_reader(reader);
+        let conn = Self::create_database()?;
+        for (i, reader) in readers.into_iter().enumerate() {
+            let table_number = i + 1;
+            let mut csv_readr = csv::ReaderBuilder::new()
+                .delimiter(b';')
+                .from_reader(reader);
 
-        let columns = {
-            csv_readr
-                .headers()
-                .chain_err(|| "Error reading headers")?
-                .clone()
-        };
-        let conn = Self::create_database(&columns, 1)?;
-        Self::fill_data(&conn, &columns, 1, csv_readr)?;
+            let columns = {
+                csv_readr
+                    .headers()
+                    .chain_err(|| "Error reading headers")?
+                    .clone()
+            };
+            Self::create_table(&conn, &columns, table_number)?;
+            Self::fill_data(&conn, &columns, table_number, csv_readr)?;
+        }
         Ok(Executor { conn, output })
     }
 
-    fn create_database(
+    fn create_database() -> Result<sqlite::Connection> {
+        Ok(sqlite::open(":memory:").chain_err(|| "Error opening memory database.")?)
+    }
+
+    fn create_table(
+        conn: &sqlite::Connection,
         columns: &csv::StringRecord,
-        table_number: u8,
-    ) -> Result<sqlite::Connection> {
-        let conn = sqlite::open(":memory:").chain_err(|| "Error opening memory database.")?;
+        table_number: usize,
+    ) -> Result<()> {
         let quoted_columns: Vec<String> = columns
             .iter()
             .map(|c| format!("\"{}\" VARCHAR NULL", c))
@@ -51,13 +59,13 @@ where
         );
         conn.execute(&create_query)
             .chain_err(|| format!("Error creating the database. Used query {}", create_query))?;
-        Ok(conn)
+        Ok(())
     }
 
     fn fill_data<R>(
         conn: &sqlite::Connection,
         columns: &csv::StringRecord,
-        table_number: u8,
+        table_number: usize,
         mut reader: csv::Reader<R>,
     ) -> Result<()>
     where
@@ -121,12 +129,12 @@ where
     }
 }
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn test_nothing() {
-        let input = BufReader::new();
-        let mut output = BufWriter::new();
-        let mut executor = Executor::with_csv(reader, output);
-    }
-}
+// #[cfg(test)]
+// mod tests {
+//     #[test]
+//     fn test_nothing() {
+//         let input = BufReader::new();
+//         let mut output = BufWriter::new();
+//         let mut executor = Executor::with_csv(reader, output);
+//     }
+// }

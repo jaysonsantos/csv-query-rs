@@ -11,10 +11,31 @@ Assuming you already have cargo just run this:
 When the project is mature enough it will be sent to crates.io.
 
 ## Usage
-Right know CSV files have to come from the stdin, this will change in the future.
+Save these two example files.
+
+user.csv
+```csv
+user_id;name
+user_id;name
+1;User 1
+2;User 2
+3;User 3
+```
+
+credits.csv
+```csv
+user_id;credit
+1;5
+1;30
+2;3
+1;4
+3;1
+```
+and you should be able to run this query over it
 ```bash
-$ echo -e '"name";"value"\n"User 1";30\n"User 1";40\n"User 2";51\n"User 3";10\n"User 3";15' | \
-    csv_query 'select name, avg(value) from table1 group by name having avg(value) > 30'
-[String("User 1"), Float(35.0)]
-[String("User 2"), Float(51.0)]
+$ csv_query -q "select u.name, sum(c.credit) credits, avg(c.credit) avg_credits from table1 u join table2 c on u.user_id = c.user_id group by u.user_id having avg(c.credit) >= 3" -f user.csv -f credits.csv
+
+"name";"credits";"avg_credits"
+"User 1";"39";"13"
+"User 2";"3";"3"
 ```
