@@ -4,6 +4,7 @@ extern crate csv;
 extern crate error_chain;
 extern crate sqlite;
 
+mod csv_utils;
 mod db_utils;
 mod errors;
 mod executor;
@@ -39,16 +40,36 @@ fn process() -> Result<()> {
                 .multiple(true)
                 .help("CSV files to work with"),
         )
+        .arg(
+            Arg::with_name("delimiter")
+                .short("d")
+                .long("delimiter")
+                .takes_value(true)
+                .default_value(";")
+                .help("Delimiter used in your CSV"),
+        )
         .get_matches();
 
-    let input_buffers: Vec<io::BufReader<File>> = matches
+    let mut input_buffers: Vec<io::BufReader<File>> = vec![];
+
+    for f in matches
         .values_of("files")
         .unwrap()
-        .map(|f| File::open(f).chain_err(|| format!("Error opening file: {}", f)))
-        .map(|f| io::BufReader::new(f.unwrap()))
-        .collect();
+        .map(|f| File::open(f).chain_err(|| format!("Opening file: {:?}", f)))
+    {
+        input_buffers.push(io::BufReader::new(f?));
+    }
 
-    let mut executor = Executor::with_csv(input_buffers, io::BufWriter::new(io::stdout()))?;
+    let delimiter = {
+        let delimiter = matches.value_of("delimiter").unwrap();
+        if delimiter.len() > 1 {
+            bail!("Invalid delimiter {:?}", delimiter);
+        }
+        delimiter.as_bytes()[0]
+    };
+
+    let mut executor =
+        Executor::with_csv(input_buffers, io::BufWriter::new(io::stdout()), delimiter)?;
     let query = matches.value_of("query").unwrap();
     executor.print_results(query)?;
     Ok(())
