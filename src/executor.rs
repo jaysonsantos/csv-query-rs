@@ -3,6 +3,7 @@ use std::io::{BufRead, Read, Write};
 use csv;
 use sqlite;
 
+use csv_utils::db_data_to_csv_output;
 use db_utils::{escape_columns, escape_values};
 use errors::{Result, ResultExt};
 
@@ -10,13 +11,14 @@ pub struct Executor<W: Write> {
     // columns: Vec<String>,
     conn: sqlite::Connection,
     output: W,
+    delimiter: u8,
 }
 
 impl<W> Executor<W>
 where
     W: Write,
 {
-    pub fn with_csv<R>(readers: Vec<R>, output: W) -> Result<Executor<W>>
+    pub fn with_csv<R>(readers: Vec<R>, output: W, delimiter: u8) -> Result<Executor<W>>
     where
         R: BufRead,
     {
@@ -24,7 +26,7 @@ where
         for (i, reader) in readers.into_iter().enumerate() {
             let table_number = i + 1;
             let mut csv_readr = csv::ReaderBuilder::new()
-                .delimiter(b';')
+                .delimiter(delimiter)
                 .from_reader(reader);
 
             let columns = {
@@ -36,7 +38,11 @@ where
             Self::create_table(&conn, &columns, table_number)?;
             Self::fill_data(&conn, &columns, table_number, csv_readr)?;
         }
-        Ok(Executor { conn, output })
+        Ok(Executor {
+            conn,
+            output,
+            delimiter,
+        })
     }
 
     fn create_database() -> Result<sqlite::Connection> {
@@ -89,11 +95,18 @@ where
         Ok(())
     }
 
+    fn delimiter_to_string(&self) -> String {
+        let mut delimiter = String::new();
+        delimiter.push(self.delimiter as char);
+        delimiter
+    }
+
     pub fn print_results(&mut self, query: &str) -> Result<()> {
         let prepared = self
             .conn
             .prepare(query)
             .chain_err(|| format!("Error preparing query: {}", query))?;
+        let delimiter = self.delimiter_to_string();
         let output_error = "Error writing on selected output";
         writeln!(
             self.output,
@@ -103,7 +116,7 @@ where
                 .iter()
                 .map(|c| format!("\"{}\"", c))
                 .collect::<Vec<String>>()
-                .join(";")
+                .join(&delimiter)
         ).chain_err(|| output_error)?;
         let mut cursor = prepared.cursor();
         while let Some(row) = cursor.next().chain_err(|| "Error reading results")? {
@@ -111,18 +124,9 @@ where
                 self.output,
                 "{}",
                 row.iter()
-                    .map(|e| format!(
-                        "\"{}\"",
-                        match e.kind() {
-                            sqlite::Type::Float => e.as_float().unwrap().to_string(),
-                            sqlite::Type::String => e.as_string().unwrap().to_owned(),
-                            sqlite::Type::Integer => e.as_integer().unwrap().to_string(),
-                            sqlite::Type::Null => "".to_owned(),
-                            _ => "Cannot parse binary".to_owned(),
-                        }
-                    ))
+                    .map(db_data_to_csv_output)
                     .collect::<Vec<String>>()
-                    .join(";")
+                    .join(&delimiter)
             ).chain_err(|| output_error)?;
         }
         Ok(())
