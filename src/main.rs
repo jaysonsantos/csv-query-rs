@@ -68,8 +68,7 @@ fn process() -> Result<()> {
         delimiter.as_bytes()[0]
     };
 
-    let mut executor =
-        Executor::with_csv(input_buffers, io::BufWriter::new(io::stdout()), delimiter)?;
+    let mut executor = Executor::new(input_buffers, io::BufWriter::new(io::stdout()), delimiter)?;
     let query = matches.value_of("query").unwrap();
     executor.print_results(query)?;
     Ok(())

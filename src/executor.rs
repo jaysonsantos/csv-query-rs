@@ -18,26 +18,12 @@ impl<W> Executor<W>
 where
     W: Write,
 {
-    pub fn with_csv<R>(readers: Vec<R>, output: W, delimiter: u8) -> Result<Executor<W>>
+    pub fn new<R>(readers: Vec<R>, output: W, delimiter: u8) -> Result<Executor<W>>
     where
         R: BufRead,
     {
         let conn = Self::create_database()?;
-        for (i, reader) in readers.into_iter().enumerate() {
-            let table_number = i + 1;
-            let mut csv_readr = csv::ReaderBuilder::new()
-                .delimiter(delimiter)
-                .from_reader(reader);
-
-            let columns = {
-                csv_readr
-                    .headers()
-                    .chain_err(|| "Error reading headers")?
-                    .clone()
-            };
-            Self::create_table(&conn, &columns, table_number)?;
-            Self::fill_data(&conn, &columns, table_number, csv_readr)?;
-        }
+        Self::process_csv_files(readers, delimiter, &conn)?;
         Ok(Executor {
             conn,
             output,
@@ -47,6 +33,33 @@ where
 
     fn create_database() -> Result<sqlite::Connection> {
         Ok(sqlite::open(":memory:").chain_err(|| "Error opening memory database.")?)
+    }
+
+    fn process_csv_files<R>(readers: Vec<R>, delimiter: u8, conn: &sqlite::Connection) -> Result<()>
+    where
+        R: Read,
+    {
+        for (i, reader) in readers.into_iter().enumerate() {
+            let table_number = i + 1;
+            let mut csv_reader = csv::ReaderBuilder::new()
+                .delimiter(delimiter)
+                .from_reader(reader);
+
+            let columns = Self::get_csv_columns(&mut csv_reader)?;
+            Self::create_table(&conn, &columns, table_number)?;
+            Self::fill_data(&conn, &columns, table_number, csv_reader)?;
+        }
+        Ok(())
+    }
+
+    fn get_csv_columns<R>(csv_reader: &mut csv::Reader<R>) -> Result<csv::StringRecord>
+    where
+        R: Read,
+    {
+        Ok(csv_reader
+            .headers()
+            .chain_err(|| "Error reading headers")?
+            .clone())
     }
 
     fn create_table(
@@ -152,7 +165,7 @@ mod tests {
         let mut output_buffer = Cursor::new(output);
         {
             let buf = output_buffer.by_ref();
-            let mut executor = Executor::with_csv(input, buf, b';').unwrap();
+            let mut executor = Executor::new(input, buf, b';').unwrap();
             executor
                 .print_results("select user, age from table1")
                 .unwrap();
@@ -171,7 +184,7 @@ mod tests {
         let mut output_buffer = Cursor::new(output);
         {
             let buf = output_buffer.by_ref();
-            let mut executor = Executor::with_csv(input, buf, b';').unwrap();
+            let mut executor = Executor::new(input, buf, b';').unwrap();
             executor
                 .print_results(
                     "select u.user, sum(price)
