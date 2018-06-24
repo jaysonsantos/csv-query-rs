@@ -1,4 +1,6 @@
 # CSV Query
+[![Build Status](https://travis-ci.org/jaysonsantos/csv-query-rs.svg?branch=master)](https://travis-ci.org/jaysonsantos/csv-query-rs)
+
 This is based on the idea of [rows](https://github.com/turicas/rows) but I want to limit it only to a fast CSV parser with the embeded sqlite query.
 
 **This is still is not fully done**
