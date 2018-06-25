@@ -8,7 +8,7 @@ This is based on the idea of [rows](https://github.com/turicas/rows) but I want 
 ## Installing
 ### Homebrew
 ```
-brew install jaysonsantos/repo/csv-query
+brew install jaysonsantos/tools/csv-query
 ```
 ### From source
 Assuming you already have cargo just run this:
