@@ -32,7 +32,7 @@ where
     }
 
     fn create_database() -> Result<sqlite::Connection> {
-        Ok(sqlite::open(":memory:").chain_err(|| "Error opening memory database.")?)
+        Ok(sqlite::open(":memory:").chain_err(|| "Opening memory database.")?)
     }
 
     fn process_csv_files<R>(readers: Vec<R>, delimiter: u8, conn: &sqlite::Connection) -> Result<()>
@@ -58,7 +58,7 @@ where
     {
         Ok(csv_reader
             .headers()
-            .chain_err(|| "Error reading headers")?
+            .chain_err(|| "Reading headers")?
             .clone())
     }
 
