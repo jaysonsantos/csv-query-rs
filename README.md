@@ -6,6 +6,11 @@ This is based on the idea of [rows](https://github.com/turicas/rows) but I want 
 **This is still is not fully done**
 
 ## Installing
+### Homebrew
+```
+brew install jaysonsantos/repo/csv-query
+```
+### From source
 Assuming you already have cargo just run this:
 ```
  cargo install --git https://github.com/jaysonsantos/csv-query-rs
