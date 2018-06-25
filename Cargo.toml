@@ -10,7 +10,7 @@ error-chain = "*"
 # sqlite = "*"
 
 [[bin]]
-name = "csv_query"
+name = "csv-query"
 path = "src/main.rs"
 
 [dependencies.sqlite]
