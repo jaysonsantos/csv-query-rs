@@ -39,7 +39,15 @@ user_id;credit
 ```
 and you should be able to run this query over it
 ```bash
-$ csv-query -q "select u.name, sum(c.credit) credits, avg(c.credit) avg_credits from table1 u join table2 c on u.user_id = c.user_id group by u.user_id having avg(c.credit) >= 3" -f user.csv -f credits.csv
+$ csv-query -q "
+select
+    u.name, sum(c.credit) credits, avg(c.credit) avg_credits
+from table1 u
+join table2 c
+    on u.user_id = c.user_id
+group by u.user_id
+having avg(c.credit) >= 3" \
+-f user.csv -f credits.csv
 
 "name";"credits";"avg_credits"
 "User 1";"39";"13"
