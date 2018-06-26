@@ -2,7 +2,7 @@ extern crate clap;
 extern crate csv;
 #[macro_use]
 extern crate error_chain;
-extern crate sqlite;
+extern crate rusqlite;
 
 mod csv_utils;
 mod db_utils;
