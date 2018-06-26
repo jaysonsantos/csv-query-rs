@@ -65,7 +65,7 @@ fn process() -> Result<()> {
 
     let mut executor = Executor::new(input_buffers, io::BufWriter::new(io::stdout()), delimiter)?;
     let query = matches.value_of("query").unwrap();
-    executor.print_results(query)?;
+    executor.write_query_results(query)?;
     Ok(())
 }
 

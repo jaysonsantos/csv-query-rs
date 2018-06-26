@@ -7,6 +7,7 @@ use csv_utils::string_to_csv_output;
 use db_utils::{escape_columns, escape_values, AllString};
 use errors::{Result, ResultExt};
 
+/// Main struct that parses the CSV and put the data into a SQLite
 pub struct Executor<W: Write> {
     conn: rusqlite::Connection,
     output: W,
@@ -117,7 +118,8 @@ where
         delimiter
     }
 
-    pub fn print_results(&mut self, query: &str) -> Result<()> {
+    /// Run the query and write its result as CSV into the specified output stream
+    pub fn write_query_results(&mut self, query: &str) -> Result<()> {
         let delimiter = self.delimiter_to_string();
         let mut prepared = Self::prepare_query(&self.conn, query)?;
         let output_error = "Error writing on selected output";

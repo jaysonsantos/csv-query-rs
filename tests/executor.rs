@@ -21,7 +21,7 @@ fn test_nothing() {
         let buf = output_buffer.by_ref();
         let mut executor = Executor::new(input, buf, b';').unwrap();
         executor
-            .print_results("select user, age from table1")
+            .write_query_results("select user, age from table1")
             .unwrap();
     }
     let output = output_buffer.into_inner();
@@ -40,7 +40,7 @@ fn test_join() {
         let buf = output_buffer.by_ref();
         let mut executor = Executor::new(input, buf, b';').unwrap();
         executor
-            .print_results(
+            .write_query_results(
                 "select u.user, sum(price)
                     from table1 u
                     join table2 o
