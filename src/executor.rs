@@ -8,7 +8,6 @@ use db_utils::{escape_columns, escape_values, AllString};
 use errors::{Result, ResultExt};
 
 pub struct Executor<W: Write> {
-    // columns: Vec<String>,
     conn: rusqlite::Connection,
     output: W,
     delimiter: u8,
@@ -119,37 +118,58 @@ where
     }
 
     pub fn print_results(&mut self, query: &str) -> Result<()> {
-        let mut prepared = self
-            .conn
-            .prepare(query)
-            .chain_err(|| format!("Error preparing query: {}", query))?;
         let delimiter = self.delimiter_to_string();
+        let mut prepared = Self::prepare_query(&self.conn, query)?;
         let output_error = "Error writing on selected output";
-        writeln!(
-            self.output,
-            "{}",
-            &prepared
-                .column_names()
-                .iter()
-                .map(|c| format!("\"{}\"", c))
-                .collect::<Vec<String>>()
-                .join(&delimiter)
-        ).chain_err(|| output_error)?;
+        Self::write_headers(&prepared, &mut self.output, &output_error, &delimiter)?;
         let mut rows = prepared
             .query(&[])
             .chain_err(|| "Error binding parameters")?;
+        Self::write_rows(&mut rows, &mut self.output, &output_error, &delimiter)?;
+        Ok(())
+    }
+
+    fn prepare_query<'a>(
+        conn: &'a rusqlite::Connection,
+        query: &str,
+    ) -> Result<rusqlite::Statement<'a>> {
+        Ok(conn
+            .prepare(query)
+            .chain_err(|| format!("Error preparing query: {}", query))?)
+    }
+
+    fn write_headers(
+        prepared: &rusqlite::Statement,
+        output: &mut W,
+        output_error: &str,
+        delimiter: &str,
+    ) -> Result<()> {
+        let columns_names = prepared
+            .column_names()
+            .iter()
+            .map(|c| format!("\"{}\"", c))
+            .collect::<Vec<String>>()
+            .join(&delimiter);
+        writeln!(output, "{}", columns_names).chain_err(|| output_error)?;
+        Ok(())
+    }
+
+    fn write_rows(
+        rows: &mut rusqlite::Rows,
+        output: &mut W,
+        output_error: &str,
+        delimiter: &str,
+    ) -> Result<()> {
         while let Some(row) = rows.next() {
             let row = row.chain_err(|| "Error reading results")?;
-            writeln!(
-                self.output,
-                "{}",
-                (0..row.column_count())
-                    .map(|r| row.get::<i32, AllString>(r).into())
-                    .map(string_to_csv_output)
-                    .collect::<Vec<String>>()
-                    .join(&delimiter)
-            ).chain_err(|| output_error)?;
+            let output_rows = (0..row.column_count())
+                .map(|r| row.get::<i32, AllString>(r).into())
+                .map(string_to_csv_output)
+                .collect::<Vec<String>>()
+                .join(&delimiter);
+            writeln!(output, "{}", output_rows).chain_err(|| output_error)?;
         }
+
         Ok(())
     }
 }
