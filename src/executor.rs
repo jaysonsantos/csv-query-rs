@@ -1,15 +1,15 @@
 use std::io::{BufRead, Read, Write};
 
 use csv;
-use sqlite;
+use rusqlite;
 
-use csv_utils::db_data_to_csv_output;
-use db_utils::{escape_columns, escape_values};
+use csv_utils::string_to_csv_output;
+use db_utils::{escape_columns, escape_values, AllString};
 use errors::{Result, ResultExt};
 
 pub struct Executor<W: Write> {
     // columns: Vec<String>,
-    conn: sqlite::Connection,
+    conn: rusqlite::Connection,
     output: W,
     delimiter: u8,
 }
@@ -31,11 +31,15 @@ where
         })
     }
 
-    fn create_database() -> Result<sqlite::Connection> {
-        Ok(sqlite::open(":memory:").chain_err(|| "Opening memory database.")?)
+    fn create_database() -> Result<rusqlite::Connection> {
+        Ok(rusqlite::Connection::open_in_memory().chain_err(|| "Opening memory database.")?)
     }
 
-    fn process_csv_files<R>(readers: Vec<R>, delimiter: u8, conn: &sqlite::Connection) -> Result<()>
+    fn process_csv_files<R>(
+        readers: Vec<R>,
+        delimiter: u8,
+        conn: &rusqlite::Connection,
+    ) -> Result<()>
     where
         R: Read,
     {
@@ -63,7 +67,7 @@ where
     }
 
     fn create_table(
-        conn: &sqlite::Connection,
+        conn: &rusqlite::Connection,
         columns: &csv::StringRecord,
         table_number: usize,
     ) -> Result<()> {
@@ -76,13 +80,13 @@ where
             table_number,
             quoted_columns.join(", ")
         );
-        conn.execute(&create_query)
+        conn.execute(&create_query, &[])
             .chain_err(|| format!("Error creating the database. Used query {}", create_query))?;
         Ok(())
     }
 
     fn fill_data<R>(
-        conn: &sqlite::Connection,
+        conn: &rusqlite::Connection,
         columns: &csv::StringRecord,
         table_number: usize,
         mut reader: csv::Reader<R>,
@@ -103,7 +107,7 @@ where
             rows.push(format!("({})", db_row.join(", ")));
         }
         let final_query = format!("{}{}", insert, rows.join(",\n"));
-        conn.execute(&final_query)
+        conn.execute(&final_query, &[])
             .chain_err(|| "Error running insert query.")?;
         Ok(())
     }
@@ -115,7 +119,7 @@ where
     }
 
     pub fn print_results(&mut self, query: &str) -> Result<()> {
-        let prepared = self
+        let mut prepared = self
             .conn
             .prepare(query)
             .chain_err(|| format!("Error preparing query: {}", query))?;
@@ -131,13 +135,17 @@ where
                 .collect::<Vec<String>>()
                 .join(&delimiter)
         ).chain_err(|| output_error)?;
-        let mut cursor = prepared.cursor();
-        while let Some(row) = cursor.next().chain_err(|| "Error reading results")? {
+        let mut rows = prepared
+            .query(&[])
+            .chain_err(|| "Error binding parameters")?;
+        while let Some(row) = rows.next() {
+            let row = row.chain_err(|| "Error reading results")?;
             writeln!(
                 self.output,
                 "{}",
-                row.iter()
-                    .map(db_data_to_csv_output)
+                (0..row.column_count())
+                    .map(|r| row.get::<i32, AllString>(r).into())
+                    .map(string_to_csv_output)
                     .collect::<Vec<String>>()
                     .join(&delimiter)
             ).chain_err(|| output_error)?;
