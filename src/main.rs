@@ -1,21 +1,16 @@
 extern crate clap;
-extern crate csv;
 #[macro_use]
 extern crate error_chain;
-extern crate rusqlite;
 
-mod csv_utils;
-mod db_utils;
-mod errors;
-mod executor;
+extern crate csv_query;
 
 use std::fs::File;
 use std::io;
 
 use clap::{App, Arg};
 
-use errors::{Result, ResultExt};
-use executor::Executor;
+use csv_query::errors::{Result, ResultExt};
+use csv_query::Executor;
 
 const PROGRAM: &str = "csv-query";
 const VERSION: &str = env!("CARGO_PKG_VERSION");

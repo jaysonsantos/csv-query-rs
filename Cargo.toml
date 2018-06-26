@@ -9,6 +9,10 @@ csv = "*"
 error-chain = "*"
 rusqlite = "*"
 
+[lib]
+name = "csv_query"
+path = "src/lib.rs"
+
 [[bin]]
 name = "csv-query"
 path = "src/main.rs"
