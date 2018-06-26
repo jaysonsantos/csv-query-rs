@@ -2,6 +2,8 @@
 authors = ["Jayson Reis <santosdosreis@gmail.com>"]
 name = "csv-query-rs"
 version = "0.1.0"
+license = "MIT"
+readme = "README.md"
 
 [dependencies]
 clap = "*"
