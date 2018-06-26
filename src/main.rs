@@ -17,8 +17,8 @@ use clap::{App, Arg};
 use errors::{Result, ResultExt};
 use executor::Executor;
 
-const PROGRAM: &'static str = "csv-query";
-const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+const PROGRAM: &str = "csv-query";
+const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 fn process() -> Result<()> {
     let matches = App::new(PROGRAM)

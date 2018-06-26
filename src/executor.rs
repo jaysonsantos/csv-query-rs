@@ -164,7 +164,7 @@ where
             let row = row.chain_err(|| "Error reading results")?;
             let output_rows = (0..row.column_count())
                 .map(|r| row.get::<i32, AllString>(r).into())
-                .map(string_to_csv_output)
+                .map(|r| string_to_csv_output(&r))
                 .collect::<Vec<String>>()
                 .join(&delimiter);
             writeln!(output, "{}", output_rows).chain_err(|| output_error)?;
