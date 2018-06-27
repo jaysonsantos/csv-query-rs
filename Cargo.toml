@@ -12,6 +12,9 @@ csv = "1.0.0"
 error-chain = "0.12.0"
 rusqlite = "0.13.0"
 
+[features]
+sqlite_bundled = ["rusqlite/bundled"]
+
 [lib]
 name = "csv_query"
 path = "src/lib.rs"
