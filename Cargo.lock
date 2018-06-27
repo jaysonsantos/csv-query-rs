@@ -84,8 +84,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "csv-query-rs"
-version = "0.2.1"
+name = "csv-query"
+version = "0.3.0"
 dependencies = [
  "clap 2.32.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "csv 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
