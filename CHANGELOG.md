@@ -1,3 +1,9 @@
+<a name="0.2.1"></a>
+### 0.2.1 Pin dependencies (2018-06-27)
+
+
+
+
 <a name="0.2.0"></a>
 ## 0.2.0 New license, use ruslite, break code into lib and bin (2018-06-27)
 
