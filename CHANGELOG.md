@@ -1,3 +1,13 @@
+<a name="0.3.0"></a>
+## 0.3.0 (2018-06-27)
+
+
+#### Bug Fixes
+
+*   Fix package's name to match lib's name ([534e0901](https://github.com/jaysonsantos/csv-query-rs/commit/534e0901aed1b98c3c6ac76c2d837ef3ce61e66b))
+
+
+
 <a name="0.2.1"></a>
 ### 0.2.1 Pin dependencies (2018-06-27)
 
