@@ -53,3 +53,6 @@ having avg(c.credit) >= 3" \
 "User 1";"39";"13"
 "User 2";"3";"3"
 ```
+
+## Disclaimer
+If you don't need the flexibility of SQLite or want to do things real fast and use a more mature project you should use [xsv](https://github.com/BurntSushi/xsv/).
