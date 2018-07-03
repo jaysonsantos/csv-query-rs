@@ -43,6 +43,14 @@ fn process() -> Result<()> {
                 .default_value(";")
                 .help("Delimiter used in your CSV"),
         )
+        .arg(
+            Arg::with_name("insert-batch-size")
+                .short("b")
+                .long("insert-batch-size")
+                .takes_value(true)
+                .default_value("1000")
+                .help("How many line to buffer before inserting them into the database"),
+        )
         .get_matches();
 
     let mut input_buffers: Vec<io::BufReader<File>> = vec![];
@@ -63,7 +71,16 @@ fn process() -> Result<()> {
         delimiter.as_bytes()[0]
     };
 
-    let mut executor = Executor::new(input_buffers, io::BufWriter::new(io::stdout()), delimiter)?;
+    let mut executor = Executor::new(
+        input_buffers,
+        io::BufWriter::new(io::stdout()),
+        delimiter,
+        matches
+            .value_of("insert-batch-size")
+            .unwrap()
+            .parse()
+            .chain_err(|| "Batch size is not a valid integer")?,
+    )?;
     let query = matches.value_of("query").unwrap();
     executor.write_query_results(query)?;
     Ok(())

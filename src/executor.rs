@@ -18,12 +18,17 @@ impl<W> Executor<W>
 where
     W: Write,
 {
-    pub fn new<R>(readers: Vec<R>, output: W, delimiter: u8) -> Result<Executor<W>>
+    pub fn new<R>(
+        readers: Vec<R>,
+        output: W,
+        delimiter: u8,
+        batch_insert_number: usize,
+    ) -> Result<Executor<W>>
     where
         R: BufRead,
     {
         let conn = Self::create_database()?;
-        Self::process_csv_files(readers, delimiter, &conn)?;
+        Self::process_csv_files(readers, delimiter, batch_insert_number, &conn)?;
         Ok(Executor {
             conn,
             output,
@@ -38,6 +43,7 @@ where
     fn process_csv_files<R>(
         readers: Vec<R>,
         delimiter: u8,
+        batch_insert_number: usize,
         conn: &rusqlite::Connection,
     ) -> Result<()>
     where
@@ -51,7 +57,13 @@ where
 
             let columns = Self::get_csv_columns(&mut csv_reader)?;
             Self::create_table(&conn, &columns, table_number)?;
-            Self::fill_data(&conn, &columns, table_number, csv_reader)?;
+            Self::fill_data(
+                &conn,
+                &columns,
+                table_number,
+                batch_insert_number,
+                csv_reader,
+            )?;
         }
         Ok(())
     }
@@ -89,6 +101,7 @@ where
         conn: &rusqlite::Connection,
         columns: &csv::StringRecord,
         table_number: usize,
+        batch_insert_number: usize,
         mut reader: csv::Reader<R>,
     ) -> Result<()>
     where
@@ -100,15 +113,31 @@ where
             table_number,
             quoted_columns.join(", ")
         );
+
         let mut rows: Vec<String> = vec![];
-        for row in reader.records() {
+        for (i, row) in reader.records().enumerate() {
             let row = row.chain_err(|| "Error reading row")?;
             let db_row = escape_values(&row);
             rows.push(format!("({})", db_row.join(", ")));
+            if i % batch_insert_number == 0 {
+                Self::batch_insert(&conn, &insert, &mut rows)?;
+            }
         }
-        let final_query = format!("{}{}", insert, rows.join(",\n"));
-        conn.execute(&final_query, &[])
+        Self::batch_insert(&conn, &insert, &mut rows)?;
+        Ok(())
+    }
+
+    /// Consume rows vector and write them into sqlite
+    fn batch_insert(
+        conn: &rusqlite::Connection,
+        insert: &String,
+        rows: &mut Vec<String>,
+    ) -> Result<()> {
+        let mut batch = { insert.clone() };
+        batch.push_str(&rows.join(",\n"));
+        conn.execute(&batch, &[])
             .chain_err(|| "Error running insert query.")?;
+        rows.clear();
         Ok(())
     }
 
