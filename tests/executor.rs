@@ -19,7 +19,7 @@ fn test_nothing() {
     let mut output_buffer = Cursor::new(output);
     {
         let buf = output_buffer.by_ref();
-        let mut executor = Executor::new(input, buf, b';').unwrap();
+        let mut executor = Executor::new(input, buf, b';', 100).unwrap();
         executor
             .write_query_results("select user, age from table1")
             .unwrap();
@@ -38,7 +38,7 @@ fn test_join() {
     let mut output_buffer = Cursor::new(output);
     {
         let buf = output_buffer.by_ref();
-        let mut executor = Executor::new(input, buf, b';').unwrap();
+        let mut executor = Executor::new(input, buf, b';', 100).unwrap();
         executor
             .write_query_results(
                 "select u.user, sum(price)
