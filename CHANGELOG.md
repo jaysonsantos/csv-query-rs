@@ -1,3 +1,13 @@
+<a name="0.3.1"></a>
+### 0.3.1 (2018-07-03)
+
+
+#### Bug Fixes
+
+*   Bump cargo version to avoid previous version with missing features ([149b186d](https://github.com/jaysonsantos/csv-query-rs/commit/149b186dd5b860473be3676ceb268da95c6dd9eb))
+
+
+
 <a name="0.3.0"></a>
 ## 0.3.0 (2018-07-03)
 
