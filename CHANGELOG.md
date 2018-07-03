@@ -1,6 +1,12 @@
 <a name="0.3.0"></a>
-## 0.3.0 (2018-06-27)
+## 0.3.0 (2018-07-03)
 
+
+#### Features
+
+*   Add docker file ([031d900e](https://github.com/jaysonsantos/csv-query-rs/commit/031d900edc1612ab73649953450e917080dcf9f5))
+*   Allow user to choose bundled sqlite ([3550b967](https://github.com/jaysonsantos/csv-query-rs/commit/3550b9672917835d1a426c463eca5ec09171ebd5))
+* **executor:**  Add support to limited insert batch size ([cbca1820](https://github.com/jaysonsantos/csv-query-rs/commit/cbca18202bcff288b0571d7b9f44059a0bbff199))
 
 #### Bug Fixes
 
