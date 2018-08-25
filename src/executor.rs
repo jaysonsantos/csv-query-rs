@@ -194,7 +194,7 @@ where
         while let Some(row) = rows.next() {
             let row = row.chain_err(|| "Error reading results")?;
             let output_rows = (0..row.column_count())
-                .map(|r| row.get::<i32, AllString>(r).into())
+                .map(|r| row.get::<usize, AllString>(r).into())
                 .map(|r| string_to_csv_output(&r))
                 .collect::<Vec<String>>()
                 .join(&delimiter);
