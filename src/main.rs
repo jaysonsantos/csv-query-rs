@@ -23,8 +23,16 @@ fn process() -> Result<()> {
                 .long("query")
                 .short("q")
                 .takes_value(true)
-                .required(true)
+                .required_unless("interactive")
                 .help("Query to run over CSV file(s)"),
+        )
+        .arg(
+            Arg::with_name("interactive")
+                .long("interactive")
+                .short("i")
+                .takes_value(false)
+                .required_unless("query")
+                .help("Open an interactive console to run and print out queries in CSV format"),
         )
         .arg(
             Arg::with_name("files")
