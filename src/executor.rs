@@ -157,6 +157,7 @@ where
             .query(&[])
             .chain_err(|| "Error binding parameters")?;
         Self::write_rows(&mut rows, &mut self.output, &output_error, &delimiter)?;
+        self.output.flush().chain_err(|| "Error writing results")?;
         Ok(())
     }
 
