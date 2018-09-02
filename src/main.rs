@@ -1,14 +1,17 @@
 extern crate clap;
+extern crate directories;
 #[macro_use]
 extern crate error_chain;
 extern crate rustyline;
 
 extern crate csv_query;
 
-use std::fs::File;
+use std::fs::{create_dir_all, File};
 use std::io::{self, Write};
 
 use clap::{App, Arg};
+
+use directories::ProjectDirs;
 
 use error_chain::ChainedError;
 
@@ -110,9 +113,19 @@ fn run_interactive<W>(mut executor: Executor<W>) -> Result<()>
 where
     W: Write,
 {
+    let history_file = ProjectDirs::from("io.github", "jaysonsantos", "csv-query").and_then(|p| {
+        let mut p = p.data_dir().to_path_buf();
+        p.push("history.txt");
+        Some(p)
+    });
     let mut rl = Editor::<()>::new();
-    if rl.load_history("history.txt").is_err() {
-        println!("No previous history.");
+    if let Some(ref history_file) = history_file.as_ref() {
+        eprintln!("Loading history from {:?}", history_file,);
+        if rl.load_history(&history_file).is_err() {
+            eprintln!("No previous history.");
+        }
+    } else {
+        eprintln!("Could not find data dir");
     }
     loop {
         let readline = rl.readline(">> ");
@@ -135,8 +148,12 @@ where
             }
         }
     }
-    rl.save_history("history.txt")
-        .chain_err(|| "Error writing history file")?;
+    if let Some(ref history_file) = history_file.as_ref() {
+        create_dir_all(history_file.parent().unwrap())
+            .chain_err(|| "Failed to create data directory")?;
+        rl.save_history(&history_file)
+            .chain_err(|| "Error writing history file")?;
+    }
     Ok(())
 }
 
