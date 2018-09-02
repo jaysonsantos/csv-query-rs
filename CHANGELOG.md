@@ -1,3 +1,12 @@
+<a name="0.4.0"></a>
+## 0.4.0 Interactive command (2018-09-02)
+
+
+#### Features
+
+* **cli:** Add interactive command with readline ([429dd344](https://github.com/jaysonsantos/csv-query-rs/commit/429dd344bd648c5c1909d649f135957f30e1d692))
+
+
 <a name="0.3.1"></a>
 ### 0.3.1 (2018-07-03)
 
