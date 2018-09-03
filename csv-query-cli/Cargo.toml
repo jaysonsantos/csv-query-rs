@@ -1,0 +1,18 @@
+[package]
+name = "csv-query-cli"
+version = "0.4.1"
+authors = ["Jayson Reis <santosdosreis@gmail.com>"]
+
+[dependencies]
+clap = "^2.32.0"
+csv-query = { path = "../csv-query" }
+directories = "^1.0.1"
+error-chain = "^0.12.0"
+rustyline = "^2.0.0"
+
+[features]
+sqlite_bundled = ["csv-query/sqlite_bundled"]
+
+[[bin]]
+name = "csv-query"
+path = "src/main.rs"
