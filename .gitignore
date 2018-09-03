@@ -1,2 +1,5 @@
 /target
+/csv-query/target
+/csv-query-cli/target
 **/*.rs.bk
+Cargo.lock
