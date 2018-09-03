@@ -13,9 +13,8 @@ brew install jaysonsantos/tools/csv-query
 ### From source
 Assuming you already have cargo just run this:
 ```
- cargo install --git https://github.com/jaysonsantos/csv-query-rs
+ cargo install csv-query-cli
 ```
-When the project is mature enough it will be sent to crates.io.
 
 ## Usage
 Save these two example files.
