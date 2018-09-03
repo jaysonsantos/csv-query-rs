@@ -1,3 +1,13 @@
+<a name="0.4.1"></a>
+### 0.4.1 (2018-09-03)
+
+
+#### Features
+
+*   Split lib from cli ([a119db57](https://github.com/jaysonsantos/csv-query-rs/commit/a119db574803062bc876731cae8a7cb575b8a73a))
+
+
+
 <a name="0.4.0"></a>
 ## 0.4.0 Interactive command (2018-09-02)
 
