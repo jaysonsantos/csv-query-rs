@@ -4,7 +4,7 @@ name = "csv-query"
 description = "Make SQL queries on CSV files"
 version = "0.4.1"
 license = "MIT"
-readme = "README.md"
+readme = "../README.md"
 
 [dependencies]
 csv = "^1.0.0"
