@@ -1,4 +1,5 @@
 use std::io::{BufRead, Read, Write};
+use std::path::Path;
 
 use csv;
 use rusqlite;
@@ -202,6 +203,16 @@ where
             writeln!(output, "{}", output_rows).chain_err(|| output_error)?;
         }
 
+        Ok(())
+    }
+
+    pub fn dump_database<P>(&self, output: P) -> Result<()>
+    where
+        P: AsRef<Path>,
+    {
+        self.conn
+            .backup(rusqlite::DatabaseName::Main, output, None)
+            .chain_err(|| "Failed to dump database")?;
         Ok(())
     }
 }
