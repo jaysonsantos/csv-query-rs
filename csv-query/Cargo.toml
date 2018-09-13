@@ -2,7 +2,7 @@
 authors = ["Jayson Reis <santosdosreis@gmail.com>"]
 name = "csv-query"
 description = "Make SQL queries on CSV files"
-version = "0.4.1"
+version = "0.5.0"
 license = "MIT"
 readme = "../README.md"
 
