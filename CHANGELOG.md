@@ -1,3 +1,14 @@
+<a name="0.5.0"></a>
+## 0.5.0 (2018-09-13)
+
+
+#### Features
+
+* **cli:**  Add dump database to cli ([1f5cbc81](https://github.com/jaysonsantos/csv-query-rs/commit/1f5cbc812e2c6ab03332ef15cac02b657ee2b9ad))
+* **lib:**  Add a way to dump internal database to a file ([12b5f5a9](https://github.com/jaysonsantos/csv-query-rs/commit/12b5f5a9b7467d3f32761cce81638c8e98570b0b))
+
+
+
 <a name="0.4.1"></a>
 ### 0.4.1 (2018-09-03)
 
