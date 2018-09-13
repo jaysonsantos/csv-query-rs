@@ -131,10 +131,10 @@ where
     /// Consume rows vector and write them into sqlite
     fn batch_insert(
         conn: &rusqlite::Connection,
-        insert: &String,
+        insert: &str,
         rows: &mut Vec<String>,
     ) -> Result<()> {
-        let mut batch = { insert.clone() };
+        let mut batch = insert.to_owned();
         batch.push_str(&rows.join(",\n"));
         conn.execute(&batch, &[])
             .chain_err(|| "Error running insert query.")?;

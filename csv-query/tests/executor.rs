@@ -4,13 +4,13 @@ use std::io::{BufReader, Cursor, Write};
 
 use csv_query::Executor;
 
-const USER_CSV: &'static str = "\"user\";\"age\"\n\
-                                \"user1\";\"10\"\n\
-                                \"user2\";\"4\"\n";
-const ORDER_CSV: &'static str = "user;price\n\
-                                 user1;10\n\
-                                 user2;30\n\
-                                 user1;50\n";
+const USER_CSV: &str = "\"user\";\"age\"\n\
+                        \"user1\";\"10\"\n\
+                        \"user2\";\"4\"\n";
+const ORDER_CSV: &str = "user;price\n\
+                         user1;10\n\
+                         user2;30\n\
+                         user1;50\n";
 
 #[test]
 fn test_nothing() {
@@ -47,8 +47,7 @@ fn test_join() {
                         on u.user = o.user
                     group by u.user
                     having sum(price) > 50",
-            )
-            .unwrap();
+            ).unwrap();
     }
     let output = output_buffer.into_inner();
     assert_eq!(
