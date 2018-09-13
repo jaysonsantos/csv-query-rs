@@ -1,6 +1,6 @@
 [package]
 name = "csv-query-cli"
-version = "0.4.1"
+version = "0.5.0"
 description = "Make SQL queries on CSV files (cli)"
 license = "MIT"
 readme = "../README.md"
@@ -9,7 +9,7 @@ authors = ["Jayson Reis <santosdosreis@gmail.com>"]
 
 [dependencies]
 clap = "^2.32.0"
-csv-query = "^0.4.1"
+csv-query = "^0.5.0"
 directories = "^1.0.1"
 error-chain = "^0.12.0"
 rustyline = "^2.0.0"

@@ -12,6 +12,8 @@ pub(crate) fn build<'a, 'b>() -> App<'a, 'b> {
                 .takes_value(true)
                 .required_unless("interactive")
                 .conflicts_with("interactive")
+                .required_unless("output")
+                .conflicts_with("output")
                 .help("Query to run over CSV file(s)"),
         ).arg(
             Arg::with_name("interactive")
@@ -20,7 +22,19 @@ pub(crate) fn build<'a, 'b>() -> App<'a, 'b> {
                 .takes_value(false)
                 .required_unless("query")
                 .conflicts_with("query")
+                .required_unless("output")
+                .conflicts_with("output")
                 .help("Open an interactive console to run and print out queries in CSV format"),
+        ).arg(
+            Arg::with_name("output")
+                .long("output")
+                .short("o")
+                .takes_value(true)
+                .required_unless("query")
+                .conflicts_with("query")
+                .required_unless("interactive")
+                .conflicts_with("interactive")
+                .help("Dump the sqlite database into a fie"),
         ).arg(
             Arg::with_name("files")
                 .short("f")

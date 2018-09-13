@@ -37,11 +37,13 @@ pub(crate) fn process() -> Result<()> {
             .parse()
             .chain_err(|| "Batch size is not a valid integer")?,
     )?;
+
     if let Some(query) = matches.value_of("query") {
         executor.write_query_results(query)?;
-    }
-    if matches.is_present("interactive") {
+    } else if matches.is_present("interactive") {
         run_interactive(executor)?;
+    } else if let Some(output_file) = matches.value_of("output") {
+        executor.dump_database(output_file)?;
     }
     Ok(())
 }
