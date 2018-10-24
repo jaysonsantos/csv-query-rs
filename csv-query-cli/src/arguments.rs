@@ -15,7 +15,8 @@ pub(crate) fn build<'a, 'b>() -> App<'a, 'b> {
                 .required_unless("output")
                 .conflicts_with("output")
                 .help("Query to run over CSV file(s)"),
-        ).arg(
+        )
+        .arg(
             Arg::with_name("interactive")
                 .long("interactive")
                 .short("i")
@@ -25,7 +26,8 @@ pub(crate) fn build<'a, 'b>() -> App<'a, 'b> {
                 .required_unless("output")
                 .conflicts_with("output")
                 .help("Open an interactive console to run and print out queries in CSV format"),
-        ).arg(
+        )
+        .arg(
             Arg::with_name("output")
                 .long("output")
                 .short("o")
@@ -34,23 +36,30 @@ pub(crate) fn build<'a, 'b>() -> App<'a, 'b> {
                 .conflicts_with("query")
                 .required_unless("interactive")
                 .conflicts_with("interactive")
-                .help("Dump the sqlite database into a fie"),
-        ).arg(
+                .help("Dump the SQLite database into a fie"),
+        )
+        .arg(
             Arg::with_name("files")
                 .short("f")
                 .long("files")
                 .takes_value(true)
                 .required(true)
                 .multiple(true)
-                .help("CSV files to work with"),
-        ).arg(
+                .help(
+                    "CSV files to work with. Each file becomes a table called \
+                     table(NUMBER) based on the order they are specified \
+                     (table1, table2, ...)",
+                ),
+        )
+        .arg(
             Arg::with_name("delimiter")
                 .short("d")
                 .long("delimiter")
                 .takes_value(true)
                 .default_value(";")
                 .help("Delimiter used in your CSV"),
-        ).arg(
+        )
+        .arg(
             Arg::with_name("insert-batch-size")
                 .short("b")
                 .long("insert-batch-size")
