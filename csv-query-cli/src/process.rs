@@ -1,11 +1,13 @@
 use std::fs::File;
 use std::io;
 
+use error_chain::bail;
+
 use csv_query::errors::{Result, ResultExt};
 use csv_query::Executor;
 
-use arguments;
-use interactive::run_interactive;
+use crate::arguments;
+use crate::interactive::run_interactive;
 
 pub(crate) fn process() -> Result<()> {
     let matches = arguments::build().get_matches();

@@ -4,9 +4,9 @@ use std::path::Path;
 use csv;
 use rusqlite;
 
-use csv_utils::string_to_csv_output;
-use db_utils::{escape_columns, escape_values, AllString};
-use errors::{Result, ResultExt};
+use crate::csv_utils::string_to_csv_output;
+use crate::db_utils::{escape_columns, escape_values, AllString};
+use crate::errors::{Result, ResultExt};
 
 /// Main struct that parses the CSV and put the data into a SQLite
 pub struct Executor<W: Write> {

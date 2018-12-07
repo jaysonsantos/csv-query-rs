@@ -1,5 +1,3 @@
-extern crate csv_query;
-
 use std::io::{BufReader, Cursor, Write};
 
 use csv_query::Executor;
@@ -47,7 +45,8 @@ fn test_join() {
                         on u.user = o.user
                     group by u.user
                     having sum(price) > 50",
-            ).unwrap();
+            )
+            .unwrap();
     }
     let output = output_buffer.into_inner();
     assert_eq!(
