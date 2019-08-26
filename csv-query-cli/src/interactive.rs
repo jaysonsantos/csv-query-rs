@@ -37,7 +37,7 @@ where
                     continue;
                 }
                 // Always add to history so user can fix mistakes
-                rl.add_history_entry(query.as_ref());
+                rl.add_history_entry(&query);
                 if let Err(e) = executor.write_query_results(&query) {
                     eprintln!("Error running query {}", e.display_chain());
                 }
