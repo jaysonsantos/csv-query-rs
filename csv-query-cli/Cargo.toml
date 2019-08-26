@@ -12,7 +12,7 @@ clap = "^2.32.0"
 csv-query = "^0.5.0"
 directories = "^1.0.1"
 error-chain = "^0.12.0"
-rustyline = "^2.0.0"
+rustyline = "^5.0.0"
 
 [features]
 sqlite_bundled = ["csv-query/sqlite_bundled"]
