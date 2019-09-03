@@ -4,6 +4,7 @@ version = "0.5.0"
 description = "Make SQL queries on CSV files (cli)"
 license = "MIT"
 readme = "../README.md"
+edition = "2018"
 
 authors = ["Jayson Reis <santosdosreis@gmail.com>"]
 

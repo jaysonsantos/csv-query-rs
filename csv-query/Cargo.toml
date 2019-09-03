@@ -5,6 +5,7 @@ description = "Make SQL queries on CSV files"
 version = "0.5.0"
 license = "MIT"
 readme = "../README.md"
+edition = "2018"
 
 [dependencies]
 csv = "^1.0.0"

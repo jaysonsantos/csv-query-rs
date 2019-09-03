@@ -1,10 +1,4 @@
-extern crate clap;
-extern crate directories;
-#[macro_use]
-extern crate error_chain;
-extern crate rustyline;
-
-extern crate csv_query;
+use error_chain::quick_main;
 
 mod arguments;
 mod interactive;
